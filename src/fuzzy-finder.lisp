@@ -1,6 +1,10 @@
 (defpackage fuzzy-finder
   (:use :cl
-        :alexandria))
+        :alexandria)
+  (:export :shift-and
+           :shift-or
+           :levenshtein-distance
+           :fuzzy-finder))
 (in-package :fuzzy-finder)
 
 (defun bitap-base (text pattern lambda)
