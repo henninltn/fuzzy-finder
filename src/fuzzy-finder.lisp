@@ -78,7 +78,7 @@
                                     (if (equal (char str1 (1- i1)) (char str2 (1- i2))) 0 1))))))
     (aref d len-str1 len-str2)))
 
-(defun fuzzy-finder (text pattern &key (distance 5) (debug nil))
+(defun fuzzy-finder (text pattern distance &key (debug nil))
   (bitap-base
     text pattern
     (lambda (text pattern finish mask)
@@ -87,37 +87,37 @@
       (debug-log "mask:~c" #\Newline)
       (maphash (lambda (k v) (debug-log "  ~a -> ~3,'0b~c" k v #\Newline))
                mask)
-      (let ((state-array (make-array (list distance)))
-            (save-state-array (make-array (list distance))))
+      (let ((state-array (make-array (list (1+ distance))))
+            (save-state-array (make-array (list (1+ distance)))))
         (debug-log ";; 初期化~c" #\Newline)
         (debug-log "state:~c" #\Newline)
-        (loop for i from 0 below distance
+        (loop for i from 0 to distance
               do (setf (aref state-array i) (1- (ash 1 i)))
               do (debug-log "  ~3,'0b~c" (aref state-array i) #\Newline))
         (loop for char in text
               for char-i from 0 below (length text)
               do (debug-log "T[~a]: ~a~c" char-i char #\Newline)
               do (debug-log ";; shift動作~cstate:~c" #\Newline #\Newline)
-              do (loop for i from 0 below distance
+              do (loop for i from 0 to distance
                        do (setf (aref state-array i)
                                 (logior (ash (aref state-array i) 1) 1))
                        do (debug-log "  ~3,'0b~c" (aref state-array i) #\Newline))
               do (debug-log ";; save動作~csave-state:~c" #\Newline #\Newline)
-              do (loop for i from 0 below distance
+              do (loop for i from 0 to distance
                        do (setf (aref save-state-array i)
                                 (logior (aref state-array i)
                                         (ash (aref state-array i) 1)
                                         (ash (aref state-array i) -1)))
                        do (debug-log "  ~3,'0b~c" (aref save-state-array i) #\Newline))
               do (debug-log ";; and動作~cstate:~c" #\Newline #\Newline)
-              do (loop for i from 0 below distance
+              do (loop for i from 0 to distance
                        do (setf (aref state-array i)
                                 (logand (aref state-array i)
                                         (gethash char mask)))
                        do (debug-log "  ~3,'0b~c" (aref state-array i) #\Newline))
               do (debug-log ";; 合成~cstate:~c" #\Newline #\Newline)
               do (debug-log "  ~3,'0b~c" (aref state-array 0) #\Newline)
-              do (loop for i from 1 below distance
+              do (loop for i from 1 to distance
                        do (setf (aref state-array i)
                                 (logior (aref state-array i)
                                         (aref save-state-array (1- i))))
