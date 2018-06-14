@@ -1,0 +1,34 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp (ql:quickload '(:fuzzy-finder) :silent t)
+  )
+
+(defpackage :ros.script.fuzzy-finder.3737941554
+  (:use :cl))
+(in-package :ros.script.fuzzy-finder.3737941554)
+
+(defun main (&rest argv)
+  (let ((text (car argv))
+        (pattern (cadr argv))
+        (distance (parse-integer (concatenate 'string (caddr argv)))))
+    (if (not (and (stringp text)
+                  (stringp pattern)
+                  (and (integerp distance)
+                       (or (zerop distance)
+                           (plusp distance)))))
+        (progn
+          (format t "~a, ~a, ~a~c" (stringp text) (stringp pattern) (type-of distance) #\Newline)
+          (format t "usage: ./fuzzy-finder.ros <text> <pattern> <distance>~c~c" #\Newline #\Newline)
+          (format t "    text: target string~c pattern: pattern string~cdistance: Levenshtein distance (zero or positive integer)~c" #\Newline #\Newline #\Newline))
+        (let ((distance-index-list (fuzzy-finder:fuzzy-finder text pattern distance)))
+          (if (null distance-index-list)
+              (format t "not matched")
+              (loop for distance-index in (sort distance-index-list
+                                                (lambda (d-i1 d-i2) (< (car d-i1) (car d-i2))))
+                    do (format t "distance: ~2d, index: ~2d~c" (car distance-index) (cdr distance-index) #\Newline)))))))
+;;; vim: set ft=lisp lisp:
