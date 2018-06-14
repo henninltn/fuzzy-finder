@@ -73,7 +73,7 @@ To load "fuzzy-finder":
 
 ## Installation
 
-1. Clone this repository into wherever below the path `ql:\*local-project-directories\*`, e.g. `~/.roswell/local-projects`
+1. Clone this repository into wherever below the path `ql:*local-project-directories*`, e.g. `~/.roswell/local-projects`
 
 ```sh
 git clone https://github.com/henninltn/fuzzy-finder.git ~/.roswell/local-projects/github.com/henninltn/
